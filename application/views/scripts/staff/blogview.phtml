@@ -1,0 +1,109 @@
+<script type="application/javascript">
+    
+    
+    
+    
+function deletePost(idPost)
+	{
+        var sure = confirm("sicuro di volerlo cancellare?");
+        if (sure)
+        {
+            var data ={'idPost':idPost};
+            var url = ' <?= $this->url(array('controller' => 'user', 'action' => 'deletepost',), 'default') ?> ';
+            $.ajax({
+
+                type : 'POST',
+                url  : url,
+                data : data,
+                success :  function(data)
+                {
+                    if(data=="0"){
+                            
+
+                    }
+                    else if(data=="1")
+                    {
+
+                        $("#"+idPost+"tr").remove();
+                    }
+                    else{
+                        //$("#"+idPost).html(data);
+                    }
+
+                }
+            });
+        }
+        return false;
+    }
+    
+    
+    
+    
+    
+    
+    
+
+</script>
+
+<br /><br />
+<div id="view-content">
+	
+    <div class="content">
+      <div class="content_bg">
+        <div class="mainbar">
+            <?php 
+            
+           
+            
+            ?><center>
+            
+            <h3><?=$this->Blog->blog_name ?></h3>
+            
+          
+           <?php if (count($this->Posts)>0): ?>
+            
+            
+        <table class="tableview">
+            
+        
+            <tr>
+                    <th>Titolo</th>    <th> post</th> <th>data</th><th>autore</th> <th>immagine</th> <th>cancella</th>
+            </tr>
+            <?php foreach($this->Posts as $post):
+                
+           
+            
+            ?>
+            <tr id="<?=$post->id_post?>tr">
+                <td><a href="<?=$this->url(array('controller' => 'staff', 'action' => 'singlepost','id_post'=>$post->id_post), 'default') ?>"><?=$post->title?></a></td>    
+                <td><?=$post->post_text?></td>  
+                <td><?php echo date('d M Y H:i', $post->timestamp); ?></td> 
+                <td><?=$post->username?></td> 
+                <td><?php if ($post->photo_name != null) echo $this->PostImgHelperStaff($post->photo_name); ?></td>
+                <td><button onclick="return deletePost(<?=$post->id_post?>)">cancella post</button></td>
+            </tr>
+            <?php endforeach;?>
+            <?php else: ?>
+            <p>Non sono presenti post in questo blog</p>
+            <?php endif?>
+        </table>
+
+          </center>
+        </div>
+          
+          
+                  
+          
+        <div class="sidebar">
+		<?= $this->render('staff/_sidelog.phtml') ?>
+     	<?= $this->render('staff/_sidebar.phtml') ?>
+        </div>
+        <div class="clr"></div>
+      </div>
+    </div>
+	<div class="fbg">
+    
+  		<?= $this->render('_fbg.phtml') ?>
+  	</div>
+	
+  </div>

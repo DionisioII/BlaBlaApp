@@ -1,0 +1,403 @@
+
+<script type="text/javascript">
+
+$(function(){
+var idBlog = $('#blogIdP').val();
+$('#blog_id_input').val(idBlog);
+	
+$('.commentTextArea').bind('keyup',function (e){
+	
+	if(e.keyCode==13)
+		{
+			var element = $(this);
+			var comment =$(this).val();
+            var srcPic = element.parent().find('.comment_pic').attr('src');
+            var nameCommentor = element.parent().find('.comment_pic').attr('alt');
+			//alert($(this).attr('id'));
+			var obj = {'comment':$(this).val(),'id_post':$(this).attr('id') };
+            
+			var url = ' <?= $this->url(array('controller' => 'user', 'action' => 'comment',), 'default') ?> ';
+			
+			
+		$.ajax({
+
+            type : 'POST',
+            url  : url,
+            data : obj,
+            beforeSend: function()
+            {
+                $('.commentTextArea').attr("disabled","true");
+                
+            },
+			 success :  function(data)
+            {
+                if(data=="error"){
+						$(this).parent().parent().prepend('Connessione assente?');
+                    
+                }
+                else if(data=="OK")
+                {
+					$('.commentTextArea').val('');
+					$('.commentTextArea').prop('disabled', false);
+
+                    element.parent().find('.comments').prepend('<div max_widht ="90px"><img class="comment_pic" align ="middle"width="30" height="30" alt="" src="'+srcPic+'" ><a href="/BlablaApp/public/index.php/user/index"><span class="nameComment">'+nameCommentor+' </span></a><span >'+comment+'</span></div><br>');
+					
+                }
+				else{
+					
+					
+					alert(data);
+				}
+                
+            }
+        });
+			return false;
+		}
+});
+    
+    
+   /* $('.com fr').bind('click',function(){
+        alert('ciao');
+        $(this).parent().parent().find('.commentSection').toggle();
+        
+        
+    });*/
+    $('#postForm').submit(function(e){
+        e.preventDefault();
+        
+        var data = new FormData($('#postForm')[0]);
+        
+        
+		submitPostFormo(data);
+                          
+        });
+	
+		
+	
+
+});
+    
+    function submitPostFormo(dataset)
+    {
+         for (var pair of dataset.entries()) {
+    console.log(pair[0]+ ', ' + pair[1]); 
+}
+		var url = ' <?= $this->url(array('controller' => 'user', 'action' => 'ajaxcreatepost',), 'default') ?> ';
+        $.ajax({
+
+            type : 'POST',
+            url  : url,
+            data : dataset,
+            processData: false,
+            contentType: false,
+            
+            beforeSend: function()
+            {
+                
+                
+            },
+            success :  function(data)
+            {
+               if(data=="OK")
+                {
+
+                   
+                    //var url = '<?=$this->url(array('controller' => 'user','action'     => 'index'), 'default',true  ); ?>';
+
+                    
+                    window.setTimeout( window.location.href = window.location.href, 4000 );
+                }
+				else{
+                    
+                    
+                    
+					
+                    $.each(data, function(i, item) {
+                        
+                        $("#"+i).parent().parent().find('.errors').html(' ');
+                        $("#"+i).parent().parent().find('.errors').html(getErrorHtml(item));
+                    });				
+                
+                }
+                
+            }
+        });
+        
+        return false;
+    }
+    
+    function getErrorHtml(formErrors)
+{
+	if((typeof(formErrors) === 'undefined') || (formErrors.length < 1)) return;
+	
+	var out = '<ul>';
+	for(errorKey in formErrors) {
+        out += '<li>' + formErrors[errorKey] + '</li>';
+    }
+    out += '</ul>';
+    return out;
+}
+    function showCommentSection(selector){
+        $(selector).parent().parent().find('.commentSection').toggle();
+    }
+	
+	
+	
+	function showPostForm()
+	{
+		/*if($('#postarea').val()!=''){
+			
+			$("#postFormPanel").toggle();
+			$('#errorPostMessage').html('');
+			$('#postFormPanel :input').val('');
+			$('#submitPostButton').val('Salva Post');
+			
+		}else{
+			alert('il post non può essere vuoto!');
+		}
+		
+		return false;*/
+		
+		$("#postFormPanel").toggle();
+			$('#errorPostMessage').html('');
+			$('#postFormPanel :input').val('');
+			$('#submitPostButton').val('Salva Post');
+		return false;
+		
+	}
+	
+	
+	
+	function submitPostForm()
+    {
+        var data =$("#postForm").serialize() ;
+		var url = 'http://localhost/BlablaApp/public/user/createpost';
+        $.ajax({
+
+            type : 'POST',
+            url  : url,
+            data : data,
+            beforeSend: function()
+            {
+                $("#errorPostMessage").html('submit del post in corso...');
+                
+            },
+            success :  function(data)
+            {
+                if(data=="error"){
+						$("#errorPostMessage").html('Alcuni dati inseriti non vanno bene');
+                    
+                }
+                else if(data=="OK")
+                {
+
+                    $("#errorPostMessage").html('post creato con successo');
+                }
+				else{
+					$("#errorPostMessage").html(data);
+				}
+                
+            }
+        });
+        return false;
+    }
+	
+	function submitPost(){
+		var formData = new FormData();
+
+		formData.append("postTitle", $('#postTitle').val());
+		formData.append("postarea", $('#postarea').val()); 
+		formData.append("id_blog",4);
+		
+		var blob = new Blob([content], { type: "image/jpg"});
+
+		// HTML file input, chosen by user
+		formData.append("postImage", blob);
+		var request = new XMLHttpRequest();
+		var url = 'http://localhost/BlablaApp/public/user/createpost';
+		request.open("POST", url);
+		request.send(formData);
+			}
+    
+    function deletePost(idPost)
+	{
+        var sure = confirm("sicuro di volerlo cancellare?");
+        if (sure)
+        {
+            var data ={'idPost':idPost};
+            var url = ' <?= $this->url(array('controller' => 'user', 'action' => 'deletepost',), 'default') ?> ';
+            $.ajax({
+
+                type : 'POST',
+                url  : url,
+                data : data,
+                success :  function(data)
+                {
+                    if(data=="0"){
+                            $("#"+idPost).html('cancellazione non riuscita');
+
+                    }
+                    else if(data=="1")
+                    {
+
+                        $("#"+idPost).html('post andato in paradiso');
+                    }
+                    else{
+                        $("#"+idPost).html(data);
+                    }
+
+                }
+            });
+        }
+        return false;
+    }
+    
+    function deleteBlog(idBlog)
+	{
+        var sure = confirm("sicuro di volerlo cancellare?");
+        
+        if (sure)
+        {
+            var data ={'idBlog':idBlog};
+            var url = ' <?= $this->url(array('controller' => 'user', 'action' => 'deleteblog',), 'default') ?> ';
+            $.ajax({
+
+                type : 'POST',
+                url  : url,
+                data : data,
+                success :  function(data)
+                {
+                    if(data=="0"){
+                            console.log("error",'cancellazione non risucita')
+
+                    }
+                    else
+                    {
+
+                        window.location.href= data;
+                    }
+
+                }
+            });
+		
+        }
+        return false;
+    }
+	
+
+
+
+	
+</script>
+
+
+
+<br /><br />
+<div id="view-content">
+	
+	<div class="content">
+      <div class="content_bg">
+		  <?php if(!is_null($this->Blog) && !is_null($this->Posts)): ?>
+		  <div id="postFormPanel" class="popup-position" hidden="hidden">
+		<div class="popup-wrapperPost">
+			<div class="popup-container">
+				<div id="errorPostMessage"></div>
+				<?php echo $this->postForm;?>
+				
+					
+			<a href="#" onclick="return showPostForm()" class="tinyline">esci</a>
+			</div>
+
+		</div>
+	</div>
+		  
+        <div class="mainbar">
+            <?php if($this->Blog->username == $this->authInfo('username') || $this->authInfo('role')!='user' ):?>
+            <a  href ="#" onclick="return deleteBlog(<?=$this->Blog->blog_id?>)"class="tinyline">elimina questo Blog</a><br>
+            <?php endif; ?>
+			<center>
+				
+				<h1><?php echo $this->Blog->blog_name; ?></h1><br>
+				<p class="description"> <?php echo $this->Blog->tema; ?></p>
+				<p id="blogIdP" hidden="hidden"><?php echo $this->Blog->blog_id;?></p>
+			</center>
+			<?php if($this->Blog->username == $this->authInfo('username') || $this->AreWeFriends($this->authInfo('username'),$this->Blog->username)): ?>
+			<center><button id="postButton" onclick="return showPostForm()">post</button></center>
+		    <?php endif; ?>
+			<?php foreach ($this->Posts as $post) :?>
+          <div class="article" id = "<?=$post->id_post?>" >
+            <h2><span><?php echo $post->title; ?></span></h2>
+            <div class="clr"></div>
+              <p class="post-data"><span class="date"><?php echo date('d M Y H:i', $post->timestamp); ?></span> &nbsp;|&nbsp; Postato da <a href="<?= $this->url(array('controller' => 'user', 'action' => 'profile','usr'=> $post->username), 'default'); ?>"><?php echo $post->username; ?></a>&nbsp;|&nbsp;
+                  
+                  <?php if($post->username == $this->authInfo('username') || $this->Blog->username == $this->authInfo('username')|| $this->authInfo('role') == 'staff') :?>
+                  
+                    <a href="" onclick="return deletePost(<?=$post->id_post?>)">cancella post</a>
+                  
+                  <?php endif; ?>
+              
+              </p>
+              
+			<?php if ($post->photo_name != null) echo $this->PostImgHelper($post->photo_name); ?>
+            <!--<img src="images/images_1.jpg" width="613" height="193" alt="" /> -->
+            <p>	<?php echo $post->post_text; ?>	 </p>
+            <p class="spec"><!--<a onclick="return showCommentSection(this);" class="com fr">Commenti</a> -->
+            <?php   
+                $urlPostView = $this->url(array('controller' => 'user', 'action' => 'singlepost','postId'=> $post->id_post,'blogId'=>$post->blog_id), 'default');
+                ?>    
+            <a href="<?=$urlPostView?>" class="rm fl">Leggi di più</a></p>
+			 <br>	
+			 	<div class="commentSection" hidden="hidden">
+					<hr>
+                    
+					<img class="comment_pic" width="30" height="30" 
+                         alt="<?=$this->authInfo('name').' '.$this->authInfo('surname') ?>" 
+                         src="<?=$this->PostImgHelper($this->authInfo('profipic'),$this->authInfo('username')) ?>" 
+                    >
+                    
+						<textarea  id="<?= $post->id_post?>" class="commentTextArea" cols="65" rows="1"></textarea>
+					<div class="comments">
+					<?php $comments =$this->CommentHelper($post->id_post);?>
+					<?php foreach ($comments as $comment) :?>
+					<div class="single_comment" >
+                        <?php $userData = $this->FriendHelper($comment->username);
+                        $urlUsrProfile =$this->url(array('controller' => 'user', 'action' => 'profile','usr'=> $userData->username), 'default');
+                        ?>
+						<div max_widht ="90px"><img class="comment_pic" align ="middle"width="30" height="30" alt="" src="<?=$this->PostImgHelper($userData->profipic,$userData->username) ?>" >
+                            
+                            <a href="<?=$urlUsrProfile?>"> <span class="nameComment"><?=$userData->name.' '.$userData->surname ?></span> </a>
+                            <span ><?= $comment->comment?></span></div><br>
+						
+			 		</div>
+					<?php endforeach?>
+			  		</div>
+			 	</div>
+			  
+            <div class="clr"></div>
+              <br>
+          </div>
+			
+			<?php endforeach?>
+			
+			 <?php if($this->Posts instanceof Zend_Paginator) {
+	  		echo $this->paginationControl($this->Posts,'Sliding','user/_paginator.phtml');
+			  } 
+			  ?>
+
+        </div>
+        <div class="sidebar">
+		<?=$this->render('_sideLog.phtml') 
+            ?>
+     	<?= $this->render('_sideBar.phtml') ?>
+        </div>
+        <div class="clr"></div>
+      </div>
+        <?php else: ?>
+        <p> Non puoi vedere questo contenuto :(</p>
+        <?php endif; ?>
+    </div>
+	<div class="fbg">
+    
+  		<?= $this->render('_fbg.phtml') ?>
+  	</div>
+</div>

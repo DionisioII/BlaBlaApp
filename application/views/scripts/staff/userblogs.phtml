@@ -1,0 +1,97 @@
+<script type="application/javascript">
+
+function deleteBlog(idBlog)
+	{
+        var sure = confirm("sicuro di volerlo cancellare?");
+        
+        if (sure)
+        {
+            var data ={'idBlog':idBlog};
+            var url = ' <?= $this->url(array('controller' => 'user', 'action' => 'deleteblog',), 'default') ?> ';
+            $.ajax({
+
+                type : 'POST',
+                url  : url,
+                data : data,
+                success :  function(data)
+                {
+                    if(data=="0"){
+                           // console.log("error",'cancellazione non risucita')
+
+                    }
+                    else
+                    {
+
+                        $("#"+idBlog+"tr").remove();
+                    }
+
+                }
+            });
+		
+        }
+        return false;
+    }
+	
+
+</script>
+
+
+
+<br /><br />
+<div id="view-content">
+	
+    <div class="content">
+      <div class="content_bg">
+        <div class="mainbar">
+            <?php $user = $this->FriendHelper($this->Username);
+            $blogs = $this->Blogs;
+            
+           
+            
+            ?><center>
+            <img class="profipicStaff myImg" width="55" height="58" alt=""  
+                     
+                     src="<?=$this->PostImgHelper($user->profipic,$user->username) ?>" /><br>
+            <h3><?= $user->name.' '.$user->surname?></h3>
+            
+          
+           <?php if (count($this->Blogs)>0): ?>
+            
+            
+        <table class="tableview">
+            
+        
+            <tr>
+                    <th>blog name</th>    <th> descrizione</th>    <th>  </th>
+            </tr>
+            <?php foreach($this->Blogs as $blog):
+                
+           
+            
+            ?>
+            <tr id ="<?=$blog->blog_id?>tr">
+                <td><a href="<?=$this->url(array('controller' => 'staff', 'action' => 'blogview','id_blog'=>$blog->blog_id), 'default') ?>"><?=$blog->blog_name?></a></td>    
+                <td><?=$blog->tema?></td>    
+                <td><button onclick="return deleteBlog(<?=$blog->blog_id?>)">cancella blog</button></td>
+            </tr>
+            <?php endforeach;?>
+            <?php else: ?>
+            <p>Non ha ancora creato nessun blog</p>
+            <?php endif?>
+        </table>
+
+          </center>
+        </div>
+        <div class="sidebar">
+		<?= $this->render('staff/_sidelog.phtml') ?>
+     	<?= $this->render('staff/_sidebar.phtml') ?>
+        </div>
+        <div class="clr"></div>
+      </div>
+    </div>
+	<div class="fbg">
+    
+  		<?= $this->render('_fbg.phtml') ?>
+  	</div>
+	
+  </div>

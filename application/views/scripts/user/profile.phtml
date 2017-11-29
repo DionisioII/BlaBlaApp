@@ -1,0 +1,120 @@
+<script type="text/javascript">
+	
+	function goToBlog()
+	{
+		$(this).parent().attr('id');
+	}
+    
+    function followBlog(button,blogId){
+            
+        if($(button).hasClass('followButton'))
+            var url = ' <?= $this->url(array('controller' => 'user', 'action' => 'followBlog',), 'default') ?>';
+        else
+            var url = ' <?= $this->url(array('controller' => 'user', 'action' => 'unfollowBlog',), 'default') ?>';
+            var obj = {'BlogId':blogId};
+            
+            
+            
+            $.ajax({
+            type : 'POST',
+            url  : url,
+            data : obj,
+			dataType: 'json',
+            beforeSend: function()
+                {
+                    $(button).html('richiesta in corso');
+                        $(button).attr("disabled","true");
+                    
+                },success:function(reply){
+                    if(reply)
+                        
+                        if($(button).hasClass('followButton')){
+                            $(button).html('following');
+                            $(button).attr("disabled","true");
+                        }
+                        else{
+                              $(button).html('unsubscribed');
+                            $(button).attr("disabled","true");  
+                        }
+                }
+            });
+        }
+    
+    
+	
+</script>
+
+<br /><br />
+<div id="view-content">
+	
+	<div class="content">
+      <div class="content_bg">
+		  
+		  
+        <div class="mainbar">
+            <?php if($this->OK):?>
+            
+			<center> <h1>I Blog di <?=$this->usrData->name ?>:</h1><br><br>
+			<?php  
+					if(null!= $this->usrData){
+						$blogs =$this->UserHelper($this->usrData->username);
+                        if(count($blogs) == 0)
+                            echo '<p>'.$this->usrData->name.' non ha ancora aperto nessun blog :( </p>';
+					}
+					
+			?>
+                
+			<?php foreach ($blogs as $blog) :?>
+				
+                <?php if(!$this->Blocked($this->AuthInfo('username'),$blog->blog_id)): ?>
+				<div id="<?=  $blog->blog_id?>"> 
+					<h2><?= $blog->blog_name?></h2>
+					<p><?= $blog->tema?></p>
+					<button onclick="location.href='<?= $this->url(array(
+                        'controller' => 'user',
+                        'action'     => 'view-single-blog',
+						'blog_id'	=> $blog->blog_id,
+						'usr' 		=> $this->usrData->username,
+                        ), 
+                        'default',true
+                    ); 
+                 ?>';" >vai al blog</button> 
+                
+                <?php if ($this->AreWeFriends($this->AuthInfo('username'),$this->usrData->username)):?>
+                
+                <?php if(!($this->AmIFollowingHelper($this->AuthInfo('username'),$blog->blog_id)) ): ?>
+                            <button                             
+                                class="followButton" onclick="return followBlog(this,<?=$blog->blog_id?>)"
+                                                     
+                                  >segui</button>
+                    <?php else: ?>
+                            <button                             
+                                class="unfollowButton" onclick="return followBlog(this,<?=$blog->blog_id?>)"
+                                                     
+                                  >non seguire più</button>
+                        <?php endif; ?>
+                    <?php endif; ?>
+                    
+					<br><br>
+				</div>
+			<?php endif; ?>
+			<?php endforeach?>
+				</center>
+            
+            <?php else:?>
+          <p> Profilo non pubblico</p>
+          <?php endif;?>
+        </div>
+          
+        <div class="sidebar">
+		<?= $this->render('_sideLog.phtml') ?>
+     	<?= $this->render('_sideBar.phtml') ?>
+        </div>
+        <div class="clr"></div>
+      </div>
+    </div>
+	<div class="fbg">
+    
+  		<?= $this->render('_fbg.phtml') ?>
+  	</div>
+</div>

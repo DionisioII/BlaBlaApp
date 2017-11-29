@@ -1,0 +1,187 @@
+
+<script type="text/javascript">
+    
+    $(function(){
+
+    $('.commentTextArea').bind('keyup',function (e){
+	
+	if(e.keyCode==13)
+		{
+			var element = $(this);
+			var comment =$(this).val();
+            var srcPic = element.parent().find('.comment_pic').attr('src');
+            var nameCommentor = element.parent().find('.comment_pic').attr('alt');
+			//alert($(this).attr('id'));
+			var obj = {'comment':$(this).val(),'id_post':$(this).attr('id') };
+            
+			var url = ' <?= $this->url(array('controller' => 'user', 'action' => 'comment',), 'default') ?> ';
+			
+			
+		$.ajax({
+
+            type : 'POST',
+            url  : url,
+            data : obj,
+            beforeSend: function()
+            {
+                $('.commentTextArea').attr("disabled","true");
+                
+            },
+			 success :  function(data)
+            {
+                if(data=="error"){
+						$(this).parent().parent().prepend('Connessione assente?');
+                    
+                }
+                else if(data=="OK")
+                {
+					$('.commentTextArea').val('');
+					$('.commentTextArea').prop('disabled', false);
+
+                    element.parent().find('.comments').prepend('<div max_widht ="90px"><img class="comment_pic" align ="middle"width="30" height="30" alt="" src="'+srcPic+'" ><a href="/BlablaApp/public/index.php/user/index"><span class="nameComment">'+nameCommentor+' </span></a><span >'+comment+'</span></div><br>');
+					
+                }
+				else{
+					
+					
+					alert(data);
+				}
+                
+            }
+        });
+			return false;
+		}
+});
+    
+    
+    });
+
+        
+    
+    function deletePost(idPost)
+	{
+        var sure = confirm("sicuro di volerlo cancellare?");
+        if (sure)
+        {
+            var data ={'idPost':idPost};
+            var url = ' <?= $this->url(array('controller' => 'user', 'action' => 'deletepost',), 'default') ?> ';
+            $.ajax({
+
+                type : 'POST',
+                url  : url,
+                data : data,
+                success :  function(data)
+                {
+                    if(data=="0"){
+                            $("#"+idPost).html('cancellazione non riuscita');
+
+                    }
+                    else if(data=="1")
+                    {
+
+                        $(".article").html('post andato in paradiso');
+                    }
+                    else{
+                        $("#"+idPost).html(data);
+                    }
+
+                }
+            });
+        }
+        
+        return false;
+    }
+    
+</script>
+
+<?php 
+$me = $this->AuthInfo('username');
+?>
+
+<br /><br />
+<div id="view-content">
+	
+	<div class="content">
+      
+      <div class="content_bg">
+		  
+        <div class="mainbar">
+            <?php if($this->Blog!= null && $this->Post!= null): ?>
+			<center>
+				
+				<h1><?php echo $this->Blog->blog_name; ?></h1><br>
+				<p class="description"> <?php echo $this->Blog->tema; ?> </p>
+				<p id="blogIdP" hidden="hidden"><?php echo $this->Blog->blog_id; ?></p>
+			</center>
+			
+			
+		  
+			
+          <div class="article" >
+            <h2><span><?php echo $this->Post->title; ?></span></h2>
+            <div class="clr"></div>
+            <p class="post-data"><span class="date"><?php echo date('d M Y H:i', $this->Post->timestamp); ?></span> &nbsp;|&nbsp; Posted by <a href="<?= $this->url(array('controller' => 'user', 'action' => 'profile','usr'=> $this->Post->username), 'default'); ?>"><?php echo $this->Post->username; ?></a> &nbsp;|&nbsp; 
+                
+                <?php if($this->Post->username == $this->authInfo('username') || $this->Blog->username == $this->authInfo('username')|| $this->authInfo('role') == 'staff') :?>
+                  
+                    <a href="" onclick="return deletePost(<?=$this->Post->id_post?>)">cancella post</a>
+                  
+                  <?php endif; ?>
+              
+              
+              </p>
+            
+			<?php if ($this->Post->photo_name != null) echo $this->PostImgHelper($this->Post->photo_name); ?>
+            <!--<img src="images/images_1.jpg" width="613" height="193" alt="" /> -->
+            <p>	<?php echo $this->Post->post_text; ?>	 </p>
+            
+			 <br>	
+			 	<div class="commentSection">
+					<hr>
+                    
+					<img class="comment_pic" width="30" height="30" 
+                         alt="<?=$this->authInfo('name').' '.$this->authInfo('surname') ?>" 
+                         src="<?=$this->PostImgHelper($this->authInfo('profipic'),$this->authInfo('username')) ?>" 
+                    >
+                        
+						<textarea  id="<?= $this->Post->id_post?>" class="commentTextArea" cols="65" rows="1"></textarea>
+                        
+					<div class="comments">
+					<?php $comments =$this->CommentHelper($this->Post->id_post);?>
+					<?php foreach ($comments as $comment) :?>
+					<div class="single_comment" >
+                        <?php $userData = $this->FriendHelper($comment->username);
+                        $urlUsrProfile =$this->url(array('controller' => 'user', 'action' => 'profile','usr'=> $userData->username), 'default');
+                        ?>
+						<div max_widht ="90px"><img class="comment_pic" align ="middle"width="30" height="30" alt="" src="<?=$this->PostImgHelper($userData->profipic,$userData->username) ?>" >
+                            
+                            <a href="<?=$urlUsrProfile?>"> <span class="nameComment"><?=$userData->name.' '.$userData->surname ?></span> </a>
+                            <span ><?= $comment->comment?></span></div><br>
+						
+			 		</div>
+					<?php endforeach?>
+			  		</div>
+			 	</div>
+			  
+            <div class="clr"></div>
+          </div>
+			
+			
+					
+			
+          <?php else: ?>
+            <p>Questo post è andato in paradiso :(</p>
+            <?php endif; ?>
+        </div>
+        <div class="sidebar">
+		<?= $this->render('_sideLog.phtml') ?>
+     	<?= $this->render('_sideBar.phtml') ?>
+        </div>
+        <div class="clr"></div>
+      </div>
+    </div>
+	<div class="fbg">
+    
+  		<?= $this->render('_fbg.phtml') ?>
+  	</div>
+</div>

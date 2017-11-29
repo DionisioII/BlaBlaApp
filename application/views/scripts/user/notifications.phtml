@@ -1,0 +1,241 @@
+
+<script type="text/javascript">
+
+ $(function() {
+  
+     updateNotificationsDB();
+     
+}); 
+
+function acceptFriendship(button,adder,receiver,idNotification)
+    {
+         
+        var data = {'adder':adder,'receiver':receiver,'idNotification':idNotification};
+        var url = ' <?= $this->url(array('controller' => 'user', 'action' => 'acceptfriendship',), 'default') ?> ';
+		
+        $.ajax({
+
+            type : 'POST',
+            url  : url,
+            data : data,
+            beforeSend: function()
+            {
+                $(button).attr("disabled","true");
+                
+            },
+            success :  function(data)
+            {
+                if(data=="error"){
+						//$("#erroremessage").html('Alcuni dati inseriti non vanno bene');
+                    
+                }
+                else if(data=="OK")
+                {
+
+                    $(button).parent().find('.disableButton').attr('disabled','true');
+                    $(button).html("richiesta accettata");
+                }
+				else{
+					//$("#erroremessage").html(data);
+				}
+                
+            }
+        });
+        return false;
+    }
+    
+    function denyFriendship(button,adder,receiver,idNotification)
+    {
+       var data = {'adder':adder,'receiver':receiver,'idNotification':idNotification};
+        var url = ' <?= $this->url(array('controller' => 'user', 'action' => 'denyfriendship',), 'default') ?> ';
+		
+        $.ajax({
+
+            type : 'POST',
+            url  : url,
+            data : data,
+            beforeSend: function()
+            {
+                $(button).attr("disabled","true");
+                
+            },
+            success :  function(data)
+            {
+                if(data=="error"){
+						//$("#erroremessage").html('Alcuni dati inseriti non vanno bene');
+                    
+                }
+                else if(data=="OK")
+                {
+                    $(button).attr('disabled','true');
+                    $(button).parent().find('.acceptBut').attr('disabled','true');
+                    $(button).html("richiesta rifiutata")
+                }
+				else{
+					//$("#erroremessage").html(data);
+				}
+                
+            }
+        });
+        return false; 
+    }
+    
+    function updateNotificationsDB()
+    {
+        var url = ' <?= $this->url(array('controller' => 'user', 'action' => 'updatenotification',), 'default') ?> ';
+          $.ajax({
+
+            type : 'POST',
+            url  : url,
+            success :  function(data)
+            {
+                if(data=="error"){
+						//$("#erroremessage").html('Alcuni dati inseriti non vanno bene');
+                    
+                }
+                else if(data==1)
+                {
+                    $('#NotificheMenuLi').find('a').html('Notifiche');
+                    $('#NotificheMenuLi').addClass('active');
+                    
+                }
+                
+            }
+        });
+    }
+
+
+</script>
+
+
+
+<br /><br />
+<div id="view-content">
+	
+    <div class="content">
+      <div class="content_bg">
+        <div class="mainbar">
+          
+          <?php 
+                if(is_null($this->Notifications))
+                {
+                    echo "<p> Non ci sono ancora notifiche :(</p>";
+                    
+                }else{
+                    
+                    foreach($this->Notifications as $notification)
+                    {
+                        switch($notification->type){
+                                
+                                
+                                
+                            case 'new post':
+                                $url = $this->url(array('controller' => 'user', 'action' => 'singlepost','postId'=> $notification->id_post,'blogId'=>$notification->id_blog), 'default');
+                                $values = $this->NotificationHelper($notification);
+                                echo '<p> nuovo <a href="'.$url.'">post</a> pubblicato da '.$values['generatorName'].' '.$values['generatorSurname'].' nel blog '.$values['blogName'].' '.date('d/m/Y H:i',strtotime($values['timestamp'])).'</p><hr></br>';
+                                break;
+                                
+                                
+                            case 'new comment':
+                                $url = $this->url(array('controller' => 'user', 'action' => 'singlepost','postId'=> $notification->id_post,'blogId'=>$notification->id_blog), 'default');
+                                $values = $this->NotificationHelper($notification);
+                                echo '<p> nuovo commento pubblicato da '.$values['generatorName'].' '.$values['generatorSurname'].' al post<a href="'.$url.'">\' '.$values['postName'].'\'</a> '.date('d/m/Y H:i',strtotime($values['timestamp'])).'</p><hr></br>';
+                                break;
+                                
+                                
+                            case 'friendship_request':
+                                $values = $this->NotificationHelper($notification);
+                                $url = $this->url(array('controller' => 'user', 'action' => 'profile','usr'=> $notification->usr_generator), 'default');
+                                
+                                echo '<p> nuova richiesta di amicizia da <a href="'.$url.'">'.$values['generatorName'].' '.$values['generatorSurname'].'</a> '.date('d/m/Y H:i',strtotime($values['timestamp'])).'</p>
+                                
+                                <button class="acceptBut" onclick="return acceptFriendship(this,\''.$notification->usr_generator.'\',\''.$notification->username.'\','.$notification->id_notification.')">accetta</button>
+                                
+                                <button onclick="return denyFriendship(this,\''.$notification->usr_generator.'\',\''.$notification->username.'\','.$notification->id_notification.')" class ="disableButton">rifiuta</button>
+                                
+                                <hr></br>';
+                                
+                                break;
+                                
+                                
+                            case 'friendship_deleted':
+                                $values = $this->NotificationHelper($notification);
+                                $url = $this->url(array('controller' => 'user', 'action' => 'profile','usr'=> $notification->usr_generator), 'default');
+                                echo '<p> amicizia rimossa da<a href="'.$url.'"> '.$values['generatorName'].' '.$values['generatorSurname'].'</a> '.date('d/m/Y H:i',strtotime($values['timestamp'])).'</p><hr></br>';
+                                break;
+                                
+                                
+                            case 'friendship_accepted':
+                                $values = $this->NotificationHelper($notification);
+                                
+                                $url = $this->url(array('controller' => 'user', 'action' => 'profile','usr'=> $notification->usr_generator), 'default');
+                                
+                                echo '<p> amicizia accettata da<a href ="'.$url.'"> '.$values['generatorName'].' '.$values['generatorSurname'].'</a> '.date('d/m/Y H:i',strtotime($values['timestamp'])).'</p><hr></br>';
+                                
+                                break;
+                                
+                                
+                            case 'new_follower':
+                                $values = $this->NotificationHelper($notification);
+                                
+                                $urlProfile = $this->url(array('controller' => 'user', 'action' => 'profile','usr'=> $notification->usr_generator), 'default');
+                                
+                                $urlBlog =$this->url(array('controller' => 'user', 'action' => 'view-single-blog','blog_id'=> $notification->id_blog), 'default');
+                                
+                                echo '<p><a href ="'.$urlProfile.'">'.$values['generatorName'].' '.$values['generatorSurname'].'</a> sta ora seguendo il tuo blog <a href="'.$urlBlog.'">'.$values['blogName'].'</a> '.date('d/m/Y H:i',strtotime($values['timestamp'])).'</p><hr></br>';
+                                
+                                break;
+                            
+                            case 'friendship_confermed':
+                                $values = $this->NotificationHelper($notification);
+                                $url = $this->url(array('controller' => 'user', 'action' => 'profile','usr'=> $notification->usr_generator), 'default');
+                                echo '<p> hai accettato la richiesta di amicizia di <a href="'.$url.'">'.$values['generatorName'].' '.$values['generatorSurname'].'</a> '.date('d/m/Y H:i',strtotime($values['timestamp'])).'</p><hr></br>';
+                                break;
+                            case 'friendship_refused':
+                                $values = $this->NotificationHelper($notification);
+                                $url = $this->url(array('controller' => 'user', 'action' => 'profile','usr'=> $notification->usr_generator), 'default');
+                                echo '<p> hai rifiutato la richiesta di amicizia di <a href="'.$url.'">'.$values['generatorName'].' '.$values['generatorSurname'].'</a> '.date('d/m/Y H:i',strtotime($values['timestamp'])).'</p><hr></br>';
+                                break;
+                            
+                            case 'request_refused':
+                                $values = $this->NotificationHelper($notification);
+                                $url = $this->url(array('controller' => 'user', 'action' => 'profile','usr'=> $notification->usr_generator), 'default');
+                                echo '<p><a href="'.$url.'">'.$values['generatorName'] .'</a> ha rifiutato la tua richiesta di amicizia   '.date('d/m/Y H:i',strtotime($values['timestamp'])).'</p><hr></br>';
+                                break;
+                            case 'post_deleted':
+                                $values = $this->NotificationHelper($notification);
+                                //$url = $this->url(array('controller' => 'user', 'action' => 'profile','usr'=> $notification->usr_generator), 'default');
+                                echo '<p> Un tuo post è stato rimosso perchè non in linea con gli standard della comunità</p>'.date('d/m/Y H:i',strtotime($values['timestamp'])).'<hr></br>';
+                                break;
+                            
+                            case 'blog_deleted':
+                                $values = $this->NotificationHelper($notification);
+                                //$url = $this->url(array('controller' => 'user', 'action' => 'profile','usr'=> $notification->usr_generator), 'default');
+                                echo '<p> Un tuo Blog è stato rimosso perchè non in linea con gli standard della comunità</p>'.date('d/m/Y H:i',strtotime($values['timestamp'])).'<hr></br>';
+                                break;
+                                
+                                
+                            default:
+                                echo' errore nella notifica';
+                                
+                        }//fine switch
+                            
+                    }// fine foreach
+                }
+            ?>
+          
+        </div>
+        <div class="sidebar">
+		<?= $this->render('_sideLog.phtml') ?>
+     	<?= $this->render('_sideBar.phtml') ?>
+        </div>
+        <div class="clr"></div>
+      </div>
+    </div>
+	<div class="fbg">
+    
+  		<?= $this->render('_fbg.phtml') ?>
+  	</div>
+	
+  </div>
+

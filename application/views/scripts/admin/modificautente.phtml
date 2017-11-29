@@ -1,0 +1,36 @@
+<script type="application/javascript">
+
+$(function(){
+    $("#data").datepicker({
+      changeMonth: true,
+      changeYear: true,
+      yearRange: "-100:+0",
+      dateFormat: 'dd/mm/yy' 
+    });
+});
+
+</script>
+
+<br /><br />
+<div id="view-content">
+	
+    <div class="content">
+      <div class="content_bg">
+        <div class="mainbar">
+        
+            <?=$this->modifyForm;?>
+          
+        </div>
+        <div class="sidebar">
+		<?= $this->render('staff/_sidelog.phtml') ?>
+     	<?= $this->render('staff/_sidebar.phtml') ?>
+        </div>
+        <div class="clr"></div>
+      </div>
+    </div>
+	<div class="fbg">
+    
+  		<?= $this->render('_fbg.phtml') ?>
+  	</div>
+	
+  </div>

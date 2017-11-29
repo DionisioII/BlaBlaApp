@@ -1,0 +1,50 @@
+<ul>
+	<li id="HomeNavLi" ><a href=" <?= $this->url(array(
+                        'controller' => 'user',
+                        'action'     => 'index',
+                        ), 
+                        'default',true
+                    ); 
+                 ?>"
+		title="Home">Home</a></li>
+	
+	
+          <!--<li><a href=" <?= $this->url(array(
+                        'controller' => 'user',
+                        'action'     => 'aboutus',
+                        ), 
+                        'default',true
+                    ); 
+                 ?>"
+		title="Home">Chi siamo</a></li>-->
+	
+          <li id="WhereNavLi"><a href=" <?= $this->url(array(
+                        'controller' => 'user',
+                        'action'     => 'where',
+                        ), 
+                        'default',true
+                    ); 
+                 ?>"
+		title="Home">Dove siamo</a></li>
+		
+		<li id="ContactNavLi"><a href=" <?= $this->url(array(
+                        'controller' => 'user',
+                        'action'     => 'contactus',
+                        ), 
+                        'default',true
+                    ); 
+                 ?>"
+		title="Home">Contattaci</a></li>
+	
+          <li ><a href=" <?= $this->url(array(
+                        'controller' => 'user',
+                        'action'     => 'logout',
+                        ), 
+                        'default',true
+                    ); 
+                 ?>"
+		title="Home">Logout</a></li>
+        </ul>
+		  <div class="clr"></div>
+
+    

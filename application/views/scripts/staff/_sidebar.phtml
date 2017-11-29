@@ -1,0 +1,163 @@
+
+
+
+<script type="text/javascript">
+
+$(function(){
+	
+	$("#blogForm").submit(function(event){
+		submitBlogForm();
+		event.preventDefault();
+		
+	})
+	
+		
+	
+
+});
+	
+	function showBlogsPanel()
+	{
+		$("#divBlog").toggle();
+		
+		return false;
+		
+		
+	}
+	
+	function showNuovoBlogPanel()
+	{
+		$("#nuovoBlogPanel").toggle();
+		$('#erroremessage').html('');
+		$(':input').val('');
+		$('#submitButton').val('Crea Blog');
+		
+		return false;
+		
+	}
+	
+	
+	function submitBlogForm()
+    {
+        var data = $("#blogForm").serialize();
+        var url = ' <?= $this->url(array('controller' => 'user', 'action' => 'createblog',), 'default') ?> ';
+		
+        $.ajax({
+
+            type : 'POST',
+            url  : url,
+            data : data,
+            beforeSend: function()
+            {
+                $("#erroremessage").html('creazione in corso...');
+                
+            },
+            success :  function(data)
+            {
+                if(data=="error"){
+						$("#erroremessage").html('Alcuni dati inseriti non vanno bene');
+                    
+                }
+                else if(data=="OK")
+                {
+                    var url = '<?=$this->url(array('controller' => 'user','action'     => 'index'), 'default',true  ); ?>';
+
+                    $("#erroremessage").html('Blog creato con successo');
+                    window.setTimeout( window.location.href = url, 4000 );
+                    
+                    
+                }
+				else{
+					$("#erroremessage").html(data);
+				}
+                
+            }
+        });
+        return false;
+    }
+    
+    
+	
+
+
+
+	
+</script>
+
+<?php
+    
+    
+        
+    $urlgestione =$this->url(array(
+                            'controller' => 'staff',
+                            'action'     => 'gestione'
+                            
+                            ), 
+                            'default',true
+                        ); 
+        
+    $urlResearch = $this->url(array(
+                            'controller' => 'staff',
+                            'action'     => 'research'
+                            
+                            ), 
+                            'default',true
+                        ); 
+    
+        
+        
+    if($this->authInfo('role') == 'admin'){
+        
+        $urlGestione = $this->url(array(
+                            'controller' => 'admin',
+                            'action'     => 'gestione'
+                            
+                            ), 
+                            'default',true
+                        ); 
+        $urlInserisci = $this->url(array(
+                            'controller' => 'admin',
+                            'action'     => 'inserisciutente'
+                            
+                            ), 
+                            'default',true
+                        ); 
+    }
+?>
+
+<div id="nuovoBlogPanel" class="popup-position" hidden="hidden">
+		<div class="popup-wrapper">
+			<div class="popup-container">
+				<div id="erroremessage"></div>
+				<?=$this->blogForm; ?>
+					
+			<a href="#" onclick="return showNuovoBlogPanel()" class="tinyline">esci</a>
+			</div>
+
+		</div>
+	</div>
+	
+               <div class="gadget">
+            <h2 class="star"><span>Sidebar</span> Menu</h2>
+            <div class="clr"></div>
+            <ul class="sb_menu">
+                
+              
+              <?php if($this->authInfo('role') == 'staff')  :?>
+              <li id="GestioneMenuLi"><a href="<?=$urlgestione?>">Gestione</a></li>
+                <?php endif;?>
+              <li id="RicercaMenuLi"><a href="<?=$urlResearch?>">Ricerca</a></li>
+             
+                <?php if($this->authInfo('role') == 'admin')  :?>
+              <li id="GestioneMenuLi"><a href="<?=$urlGestione?>">Gestione utenti</a></li>
+              <li id="InserisciMenuLi"><a href="<?=$urlInserisci?>">Inserisci utente</a></li>
+              
+              <?php endif;?>
+            </ul>
+          </div>
+
+         <br><br>
+		<br>
+         
+        
+          

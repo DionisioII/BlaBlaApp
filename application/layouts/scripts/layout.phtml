@@ -1,0 +1,54 @@
+<?php echo $this->doctype() ?>
+<html>
+<head>
+	<base href="<?= $this->baseUrl().'/'; ?>" >
+	<?= $this->headMeta(); ?>
+    <?= $this->headLink(); ?>
+    <?= $this->headTitle(); ?>
+</head>
+<body>
+	<script src="<?php echo $this->baseUrl('js/jquery-1.12.4.js');?>"></script>
+	<!--start header -->
+	<div class="main">
+  <div class="main_resize">
+    <div class="header">
+      <div class="logo">
+        <h1><a href="#"><span>BlaBla</span>App<small>Social Community</small></a></h1>
+      </div>
+      <div class="search">
+        <form method="get" id="search" action="#">
+          
+        </form>
+        <!--/searchform -->
+        <div class="clr"></div>
+      </div>
+      <div class="clr"></div>
+	  <!--end header -->
+		
+		
+	  <!--start navmenu -->
+	  <div class="menu_nav">
+       <?= $this->render('_topNavMenu.phtml') ?>
+      </div>
+	</div>
+		<!--end navmenu -->
+		
+		<!--content -->
+		<div id="content">
+  	  	<?php echo $this->layout()->content; ?>
+      	<div style="clear: both;">&nbsp;</div>
+		</div>
+	 </div>
+
+		<!-- end #content -->
+		<!--footer-->
+		<div class="footer">
+		  <div class="footer_resize">
+			<p class="lf">Copyright &copy; <a href="#">Domain Name</a>. All Rights Reserved</p>
+			<p class="rf">Design by <a target="_blank" >Giorgio Aurispa</a></p>
+			<div class="clr"></div>
+		  </div>
+		</div>
+
+		
+</body>

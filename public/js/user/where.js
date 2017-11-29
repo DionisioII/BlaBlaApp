@@ -1,0 +1,3 @@
+$(function(){
+$('#WhereNavLi').addClass('active');
+});

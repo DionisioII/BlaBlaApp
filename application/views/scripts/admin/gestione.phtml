@@ -1,0 +1,246 @@
+<script src="<?php echo $this->baseUrl('js/jquery-ui.js');?>"></script>
+  <link rel="stylesheet" href="<?php echo $this->baseUrl('css/jquery-ui.css');?>">
+  <link rel="stylesheet" href="/resources/demos/style.css">
+
+  
+<script type="application/javascript">
+
+    $(function(){
+        $('.inputElement').on('keypress',function(e){
+        
+        if(e.which == 13 || e.keydown == 13){
+                var array =$(this).attr('name').split('|');
+                saveValue(this,array[1],array[0]);
+        }
+    });
+        $(".AgeInput").datepicker({
+      changeMonth: true,
+      changeYear: true,
+      yearRange: "-100:+0",
+      dateFormat: 'dd/mm/yy' 
+    });
+	 
+        
+       
+    
+	 
+	
+    
+    
+    });
+
+    function changeParameter(spanElement)
+    {
+        var inputElement = $(spanElement).parent().find('.inputElement');
+        $(spanElement).attr('hidden','true');
+        inputElement.removeAttr('hidden');
+        inputElement.focus();
+        
+        
+    }
+    
+    function lostFocus(inputElement)
+    {
+        if(!$(inputElement).hasClass('AgeInput')){
+            $(inputElement).attr('hidden','true');
+            $(inputElement).val( $(inputElement).parent().find('.spanElement').html() );
+            $(inputElement).parent().find('.spanElement').removeAttr('hidden');
+        }
+        
+    }
+    
+    function saveValue(inputElement,column,username)
+    {
+         
+            
+            var spanElement = $(inputElement).parent().find('.spanElement');
+            var valueToSave = $(inputElement).val();
+            var data = {'username':username,'column':column,'value':valueToSave};
+            var url = ' <?= $this->url(array('controller' => 'admin', 'action' => 'modifyuser',), 'default') ?> ';
+            $.ajax({
+
+                type : 'POST',
+                url  : url,
+                data : data,
+                success :  function(data)
+                {
+                    if(data == 1){
+                            
+                            $(spanElement).html(valueToSave);
+                            $(inputElement).val(valueToSave);
+                            $(inputElement).attr('hidden','true');
+                            $(spanElement).removeAttr('hidden');
+                            
+
+                    }
+                    else{
+
+                    }
+
+                }
+            });        
+    }
+    
+    function changeRole(selectElement,role,username)
+    {
+        var data = {'username':username,'column':role,'value':$(selectElement).val()};
+        
+        var url = ' <?= $this->url(array('controller' => 'admin', 'action' => 'modifyuser',), 'default') ?> ';
+            $.ajax({
+
+                type : 'POST',
+                url  : url,
+                data : data,
+                success :  function(data)
+                {
+                    if(data == 1){
+                            
+
+                    }
+                    else{
+                            alert(data);
+                    }
+
+                }
+            });        
+    }
+    
+    function deleteUser(button,username)
+    {
+        var sure = confirm("sicuro di volerlo cancellare?");
+        if(sure){
+            var data = {'username':username};
+            var url = ' <?= $this->url(array('controller' => 'admin', 'action' => 'deleteuser',), 'default') ?> ';
+                $.ajax({
+
+                    type : 'POST',
+                    url  : url,
+                    data : data,
+                    success :  function(data)
+                    {
+                        if(data == 1){
+                                $(button).parent().parent().remove();
+
+                        }
+                        else{
+
+                        }
+
+                    }
+                }); 
+        }       
+    }
+    
+    
+
+
+</script>
+
+<br /><br />
+<div id="view-content">
+	
+    <div class="content">
+      <div class="content_bg">
+        <div class="mainbar">
+            <h4>Numero blog presenti nella comunità: <?=$this->Num_Blogs ?></h4>
+          <table id="userTable" class="tableview">
+            <tr>
+                    <th>username</th>  <th>nome</th> <th>cognome</th>  <th>role</th>  <th>data di nascita</th> <th>elimina</th><th>dettagli</th> <th>modifica</th>
+            </tr>
+            <?php foreach($this->Users as $user):?>
+            
+                <tr>
+                    
+                    <td>
+                        
+                        <input class="inputElement" onkeypress="return saveValue(this,'')" hidden ="true" type=text value="<?= $user->username?>"/>
+                        <span class="spanElement"><a href="<?= $this->url(array('controller' => 'staff', 'action' => 'userblogs','username'=>$user->username), 'default') ?> "><?= $user->username?></a></span>
+                    
+                    </td>
+                    
+                    <td>
+                        
+                        <input class="inputElement" 
+                               name ='<?= $user->username?>|name'
+                               onblur="return lostFocus(this)"                               
+                               
+                               hidden ="false" type=text value="<?= $user->name?>"
+                               
+                               />
+                        <span class="spanElement" ondblclick="return changeParameter(this)"><?= $user->name?></span>
+                                        
+                    
+                    </td>
+                    
+                    <td>
+                       <input class="inputElement" 
+                               onblur="return lostFocus(this)"                               
+                               name ='<?= $user->username?>|surname'
+                               hidden ="false" type=text value="<?= $user->surname?>"
+                               
+                               />
+                        <span class="spanElement" ondblclick="return changeParameter(this)"><?= $user->surname?></span>
+                    
+                    </td>
+                    
+                    <td>
+                        
+                         <select onchange="return changeRole(this,'role','<?= $user->username?>')" >
+                          <option  value="user"<?php if ($user->role=='user') echo 'selected';?>>user</option>
+                          <option value="staff"<?php if ($user->role=='staff') echo 'selected';?>>staff</option>
+                          <option value="admin"<?php if ($user->role=='admin') echo 'selected';?>>admin</option>
+                          
+                        </select> 
+
+                    
+                    </td>
+                    
+                    <td>
+                        <input class="inputElement AgeInput" 
+                                 
+                               onchange="return changeRole(this,'age','<?= $user->username?>')"
+                               name ='<?= $user->username?>|age' 
+                               
+                               type="text" value="<?= date('d/m/Y',strtotime($user->age));?>"
+                               
+                               readonly="readonly"
+                               
+                              />
+                        
+                    
+                    </td>
+                    
+                    
+                    <td><button onclick="return deleteUser(this,'<?=$user->username?>')">elimina</button></td>
+                    <td><a href="<?= $this->url(array('controller' => 'admin', 'action' => 'detailsuser','username'=>$user->username), 'default') ?> ">Dettagli</a></td>
+                    <td><a href="<?= $this->url(array('controller' => 'admin', 'action' => 'modificautente','username'=>$user->username), 'default') ?> ">Modifica</a></td>
+                    
+                    
+                    
+                </tr>   
+            
+            <?php endforeach;?>
+              
+          </table>  
+            
+           
+            
+          
+        </div>
+        <div class="sidebar">
+		<?= $this->render('staff/_sidelog.phtml') ?>
+     	<?= $this->render('staff/_sidebar.phtml') ?>
+        </div>
+        <div class="clr"></div>
+      </div>
+    </div>
+    
+    <br><br>
+           
+	<div class="fbg">
+    
+  		<?= $this->render('_fbg.phtml') ?>
+  	</div>
+	
+  </div>
+

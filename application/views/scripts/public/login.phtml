@@ -1,0 +1,180 @@
+
+  
+  <script src="<?php echo $this->baseUrl('js/jquery-ui.js');?>"></script>
+  <link rel="stylesheet" href="<?php echo $this->baseUrl('css/jquery-ui.css');?>">
+  <link rel="stylesheet" href="/resources/demos/style.css">
+<script type="text/javascript">
+
+$(function()
+{
+    $( "#birthdate" ).datepicker({
+      changeMonth: true,
+      changeYear: true,
+      yearRange: "-100:+0"
+    });
+	 
+	$( "#birthdate" ).datepicker( "option", "dateFormat","dd/mm/yy" );
+    
+    $(":input").bind('blur',function(event)
+    {
+        var formElementId = $(this).attr('id');
+        doValidation(formElementId);
+		//$("#errormessage").html('inviando i dati...');
+        //document.getElementById("username").parent().parent().find('.errors').html('gfyi ');
+    });
+	
+	$("#registration").submit(function(event){
+        event.preventDefault();
+        var data = new FormData($('#registration')[0]);
+        
+        
+		submitForm(data);
+		
+		
+	})
+});
+
+function doValidation(id)
+{
+	function showErrors(resp)    {
+        $("#"+id).parent().parent().find('.errors').html(' ');
+        $("#"+id).parent().parent().find('.errors').html(getErrorHtml(resp[id]));
+    }
+
+	
+    var url = ' <?= $this->url(array('controller' => 'public', 'action' => 'validatelogin',), 'default') ?> ';
+    $.ajax({
+		type: 'POST',
+		url: url,
+		data: $("#<?php echo $this->loginForm->getName() ?>").serialize(),
+		dataType: 'json',
+		success: showErrors
+    });
+}
+
+/*function getErrorHtml(formErrors)
+{
+	if((typeof(formErrors) === 'undefined') || (formErrors.length < 1)) return;
+	
+	var out = '<ul>';
+	for(errorKey in formErrors) {
+        out += '<li>' + formErrors[errorKey] + '</li>';
+    }
+    out += '</ul>';
+    return out;
+}*/
+
+function showRegistrationPanel()
+	{
+		$("#registrationPanel").toggle();
+		
+		return false;
+	}
+	
+  
+	
+	
+	////form registration submit////
+	function submitForm(dataset)
+    {
+        for (var pair of dataset.entries()) {
+    console.log(pair[0]+ ', ' + pair[1]); 
+}
+
+		var url = ' <?= $this->url(array('controller' => 'public', 'action' => 'registra',), 'default') ?> ';
+        $.ajax({
+
+            type : 'POST',
+            url  : url,
+            data : dataset,
+            processData: false,
+            contentType: false,
+            
+            beforeSend: function()
+            {
+                $("#errormessage").html('inviando i dati...');
+                
+            },
+            success :  function(data)
+            {
+                if(data == 'non puoi nascere nel futuro'){
+						$("#errormessage").html(data);
+                    
+                }
+                else if(data == 'username già preso'){
+                        $("#errormessage").html(data);
+                }
+                else if(data=="registered")
+                {
+
+                    $("#errormessage").html('registrazione riuscita');
+                    var url = '<?=$this->url(array('controller' => 'public','action'     => 'login'), 'default',true  ); ?>';
+
+                    
+                    window.setTimeout( window.location.href = url, 8000 );
+                }
+				else{
+                    
+                    $("#errormessage").html('alcuni dati inseriti non vanno bene');
+                    
+					
+                    $.each(data, function(i, item) {
+                        
+                        $("#"+i).parent().parent().find('.errors').html(' ');
+                        $("#"+i).parent().parent().find('.errors').html(getErrorHtml(item));
+                    });				
+                
+                }
+                
+            }
+        });
+        return false;
+    }
+    
+    function getErrorHtml(formErrors)
+{
+	if((typeof(formErrors) === 'undefined') || (formErrors.length < 1)) return;
+	
+	var out = '<ul>';
+	for(errorKey in formErrors) {
+        out += '<li>' + formErrors[errorKey] + '</li>';
+    }
+    out += '</ul>';
+    return out;
+}
+    
+    
+    /* form submit */
+
+
+	
+	//////End///////
+	
+	
+	
+
+	
+</script>
+
+<br /><br />
+<div id="view-content">
+	<h2>login</h2>
+ <p>Utilizza questa form per l'autenticazione</p>
+ <?=$this->loginForm; ?>
+<br>
+<p>oppure effettua la <a id="registrationclick" href="#" onclick="return showRegistrationPanel()">registrazione</a></p>
+	
+	<div id="registrationPanel" class="popup-position" hidden="hidden">
+		<div class="popup-wrapperRegistration">
+			<div class="popup-container">
+				<div id="errormessage"></div>
+					<?= $this->registrationForm ;?>
+			<a href="" onclick="return showRegistrationPanel()" class="tinyline">esci</a>
+			</div>
+
+		</div>
+	</div>
+	
+
+	
+</div>

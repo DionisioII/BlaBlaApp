@@ -1,0 +1,283 @@
+
+<script type="text/javascript">
+    
+     $(function()
+{
+	
+	$("#profiForm").submit(function(event){
+        event.preventDefault();
+        var data = new FormData($('#profiForm')[0]);
+        
+        
+		submitProfiForm(data);
+        });
+         
+    
+    $( "#birthdate" ).datepicker({
+      changeMonth: true,
+      changeYear: true,
+      yearRange: "-100:+0"
+    });
+	 
+	$( "#birthdate" ).datepicker( "option", "dateFormat","dd/mm/yy" );
+	
+         
+      $('.myImg').click(function(e){
+                showMyImg(this);  
+          
+      });
+    
+    
+		
+	});
+    
+    function showMyImg(img)
+    {
+        var modal = document.getElementById('myModal');
+        
+        // Get the image and insert it inside the modal - use its "alt" text as a caption
+        //var img = document.getElementById('myImg');
+        var modalImg = document.getElementById("img01");
+        var captionText = document.getElementById("caption");
+        //img.onclick = function(){
+        modal.style.display = "block";
+        modalImg.src = img.src;
+        
+        captionText.innerHTML = img.alt;
+        // Get the <span> element that closes the modal
+        var span = document.getElementsByClassName("close")[0];
+
+        // When the user clicks on <span> (x), close the modal
+        span.onclick = function() {
+          modal.style.display = "none";
+        }
+
+    }
+
+    
+    
+        
+    	function submitProfiForm(dataset)
+    {
+         for (var pair of dataset.entries()) {
+    console.log(pair[0]+ ', ' + pair[1]); 
+}
+		var url = ' <?= $this->url(array('controller' => 'user', 'action' => 'ajaxupdateuserinfo',), 'default') ?> ';
+        $.ajax({
+
+            type : 'POST',
+            url  : url,
+            data : dataset,
+            processData: false,
+            contentType: false,
+            
+            beforeSend: function()
+            {
+                $("#infomessage").html('inviando i dati...');
+                
+            },
+            success :  function(data)
+            {
+                if(data == 'non puoi nascere nel futuro'){
+						$("#infomessage").html(data);
+                    
+                }
+                
+                else if(data=="OK")
+                {
+
+                    $("#infomessage").html('dati aggiornati');
+                    var url = '<?=$this->url(array('controller' => 'staff','action'     => 'index'), 'default',true  ); ?>';
+
+                    
+                    window.setTimeout( window.location.href = url, 4000 );
+                }
+				else{
+                    
+                    $("#infomessage").html('alcuni dati inseriti non vanno bene');
+                    
+					
+                    $.each(data, function(i, item) {
+                        
+                        $("#"+i).parent().parent().find('.errors').html(' ');
+                        $("#"+i).parent().parent().find('.errors').html(getErrorHtml(item));
+                    });				
+                
+                }
+                
+            }
+        });
+        
+        return false;
+    }
+    
+    function getErrorHtml(formErrors)
+{
+	if((typeof(formErrors) === 'undefined') || (formErrors.length < 1)) return;
+	
+	var out = '<ul>';
+	for(errorKey in formErrors) {
+        out += '<li>' + formErrors[errorKey] + '</li>';
+    }
+    out += '</ul>';
+    return out;
+}
+    
+    
+	function showupdateInfoPanel()
+	{
+		$("#updateInfoPanel").toggle();
+		$('#infomessage').html('');
+		
+		
+		return false;
+		
+	}
+    
+	$(function(e){
+        
+        
+        $('#invisibilityCheckbox').prop('checked',<?= $this->authInfo('hidden');?>)
+		
+		$("#invisibilityCheckbox").change(function(e) {
+    // this will contain a reference to the checkbox 
+		var url = ' <?= $this->url(array('controller' => 'user', 'action' => 'togglevisibility',), 'default') ?> ';
+			
+    if (this.checked) {
+		var obj = {'visibility':'true' };
+      
+    } else {
+        var obj = {'visibility':'false' };
+    }
+			
+	$.ajax({
+
+            type : 'POST',
+            url  : url,
+            data : obj,
+            beforeSend: function()
+            {
+				
+                
+                
+            },
+			 success :  function(data)
+            {
+                if(data=="error"){
+						
+						$(this).parent().prepend('Connessione assente?');
+                    
+                }
+                else if(data=="OK")
+                {
+					
+					
+                }
+				else{				
+					
+					
+				}
+                
+            }
+        });
+			return false;
+			
+});
+	});
+	
+	
+	
+	
+
+</script>
+
+<?php if (null !== $this->usrData)
+{
+    $username = $this->usrData->username;
+	$name = $this->usrData->name;
+	$surname = $this->usrData->surname;
+	$description = $this->usrData->description;
+    $profipicture = $this->usrData->profipic;
+	$isMyProfile=false;
+	
+}else{
+    $username = $this->authInfo('username');
+	$name = $this->authInfo('name');
+	$surname = $this->authInfo('surname');
+	$description = $this->authInfo('description');
+    $profipicture = $this->authInfo('profipic');
+	$isMyProfile=true;
+};?>
+
+
+
+<div class="gadget">
+            <h2 class="star"><span>Log</span> Info</h2>
+			<br>
+            <div class="clr"></div>
+			<div id="logInfo"  >
+				
+				<img class="profipic myImg" width="55" height="58" alt="" align ="left" 
+                     
+                     src="<?=$this->PostImgHelper($profipicture,$username=$username) ?>" />
+				
+					<span id="#logNameSpan" class="name" ><?php echo  $name.' '.  $surname; ?><br>
+					<?php if($isMyProfile){
+						echo '
+							<span class="tinyline"><a href="#" onclick="return showupdateInfoPanel()">cambia info</a></span><br>
+							
+							';
+							}?></span>
+               
+   
+    
+	
+	
+	
+
+				
+			
+			<div id="updateInfoPanel" class="popup-position" hidden="hidden">
+		<div class="popup-wrapper">
+			<div class="popup-container">
+				<div id="infomessage"></div>
+				<?=$this->profiForm; ?>
+					
+			<a href="#" onclick="return showupdateInfoPanel()" class="tinyline">esci</a>
+			</div>
+
+		</div>
+	</div>
+				
+					
+
+			</div>
+	<!-- Rounded switch -->
+	
+    
+			      
+           </div>
+        
+        <!-- The Modal -->
+        <div id="myModal" class="modal">
+
+          <!-- The Close Button -->
+          <span class="close" onclick="document.getElementById('myModal').style.display='none'">&times;</span>
+
+          <!-- Modal Content (The Image) -->
+          <img class="modal-content" id="img01">
+
+          <!-- Modal Caption (Image Text) -->
+          <div id="caption"></div>
+        </div>
+
+          <!--- end modal -->
+        
+        <br><br>
+		<div class="gadget">
+            <br>
+            <div class="testi">
+              <p ><span class="q"><img src="images/qoute_1.gif" width="20" height="15" alt="" /></span> <?php echo $description; ?>. <span class="q"><img src="images/qoute_2.gif" width="20" height="15" alt="" /></span></p>
+              
+            </div>
+          </div>

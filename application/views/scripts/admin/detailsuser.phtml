@@ -1,0 +1,65 @@
+<br /><br />
+<div id="view-content">
+	
+    <div class="content">
+      <div class="content_bg">
+        <div class="mainbar">
+            <?php $userToDetail = $this->FriendHelper($this->User);
+            $numRequestsAccepted=0;
+            $numRequestRefused =0;
+            $numRequestSuspended =0;
+            $numRequests = count($this->FriendRequests);
+            
+            foreach($this->FriendRequests as $request){
+                if($request->accepted == 1)
+                    $numRequestsAccepted++;
+                elseif ($request->accepted == -1)
+                    $numRequestRefused++;
+                elseif ($request->accepted == 0)
+                    $numRequestSuspended++;
+            }
+            ?>
+            <h3>Gli amici di <?= $userToDetail->name.' '.$userToDetail->surname?></h3>
+            <p> numero totale di richieste ricevute : <?=$numRequests?><br>
+                numero di richieste accettate : <?=$numRequestsAccepted?><br>
+                numero di richieste rifiutate : <?=$numRequestRefused?><br>
+                numero di richieste in sospeso : <?=$numRequestSuspended?><br>
+                numero totale di blog pubblicati: <?= count($this->UserHelper($this->User))?><br>
+            </p>
+            <?php if(count($this->Friends) > 0): ?>
+        <table>
+            
+        
+            <tr>
+                    <th>username</th>    <th> nome</th>  <th>cognome</th>
+            </tr>
+            <?php foreach($this->Friends as $friend):
+                
+            $values = $this->FriendHelper(($friend->username == $userToDetail->username ? $friend->friend_username : $friend->username) );
+            
+            ?>
+            <tr>
+                <th><a href="<?=$this->url(array('controller' => 'staff', 'action' => 'userblogs','username'=>$values->username), 'default') ?>"><?=$values->username?></a></th>    
+                <th><?=$values->name?></th>    
+                <th><?=$values->surname?></th>
+            </tr>
+            <?php endforeach;?>
+        </table>
+            <?php else:?>
+            <p><?=$userToDetail->name.' '.$userToDetail->surname?> non ha ancora amici </p>
+            <?php endif;?>
+          
+        </div>
+        <div class="sidebar">
+		<?= $this->render('staff/_sidelog.phtml') ?>
+     	<?= $this->render('staff/_sidebar.phtml') ?>
+        </div>
+        <div class="clr"></div>
+      </div>
+    </div>
+	<div class="fbg">
+    
+  		<?= $this->render('_fbg.phtml') ?>
+  	</div>
+	
+  </div>

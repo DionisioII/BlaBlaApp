@@ -1,0 +1,61 @@
+<script type="application/javascript">
+$(function(){
+$('#AmiciMenuLi').addClass('active');
+});
+
+</script>
+
+<br /><br />
+<div id="view-content">
+	
+    <div class="content">
+      <div class="content_bg">
+        <div class="mainbar">
+         
+            <center><h1>I tuoi Amici</h1></center>
+            <?php if(count($this->Friends)==0): ?>
+            <p>Non hai ancora amici :( </p>
+            
+            <?php else :?>
+                <span>
+                <?php foreach($this->Friends as $friend):
+                    
+                    $infoUser = $this->FriendHelper($friend->username == $this->authInfo('username') ? $friend->friend_username : $friend->username );
+                    
+                ?>
+                    
+                    <div class ="friendSingleDiv">
+                        <span>
+                        <img sclass="profipic" width="55" height="58" alt="" align ="middle"
+                             src="<?=$this->PostImgHelper($infoUser->profipic,$infoUser->username) ?>"
+                             >       <br>                 
+                            <span>
+                                <a href="<?= $this->url(array('controller' => 'user', 'action' => 'profile','usr'=>$infoUser->username), 'default') ?>">
+                                <?=$infoUser->name." ". $infoUser->surname?>
+                                </a>
+                            </span><br>
+                        
+                        <button onclick="return deleteFriendshipFunction(this,'<?=$infoUser->username?>')" >rimuovi</button>
+                        </span>
+                    </div>
+                <?php endforeach;?>
+            </span>
+            <?php endif; ?>
+            
+            
+          
+        </div>
+        <div class="sidebar">
+		<?= $this->render('_sideLog.phtml') ?>
+     	<?= $this->render('_sideBar.phtml') ?>
+        </div>
+        <div class="clr"></div>
+      </div>
+    </div>
+	<div class="fbg">
+    
+  		<?= $this->render('_fbg.phtml') ?>
+  	</div>
+	
+  </div>
+

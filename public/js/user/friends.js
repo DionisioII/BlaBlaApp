@@ -1,0 +1,3 @@
+$(function(){
+$('#AmiciMenuLi').addClass('active');
+});

@@ -1,0 +1,111 @@
+<script type="application/javascript">
+
+$(function(){
+    
+    
+    $('#BlacklistMenuLi').addClass('active');
+    
+    $("#Black_button").click(function(event){
+    event.preventDefault();
+    var selectValue = $('#blog_select').val();
+    var searchIDs = $("#userListP input:checkbox:checked").map(function(){
+      return $(this).attr('id');
+    }).get(); // <----
+        
+    updateBlacklist(selectValue,searchIDs);
+        
+    
+    });
+    
+    $('#blog_select').change(function(){
+        var blog = $(this).val();
+        var url = $('#url').attr('href');
+        window.location.replace(url +'/blog_id/'+blog);
+    });
+    
+    
+    
+    
+    
+});
+    
+    function updateBlacklist(blogId,usernameList)
+    {
+        if(usernameList.length == 0)
+            usernameList = 'empty';
+        
+        var data ={'ListOfUsernames':usernameList,'blogId':blogId};
+        
+        var url = ' <?= $this->url(array('controller' => 'user', 'action' => 'updateblacklist',), 'default') ?> ';
+        $.ajax({
+
+                type : 'POST',
+                url  : url,
+                data : data,
+                success :  function(data)
+                {
+                    if(data==1){
+                            $("#resultUpdateBlacklist").html('blacklist aggiornata');
+
+                    }
+                    else if(data!=1)
+                    {
+
+                        $("#resultUpdateBlacklist").html(data);
+                    }
+                    
+
+                }
+            });
+    }
+    
+
+
+
+</script>
+
+<br /><br />
+<div id="view-content">
+	
+	<div class="content">
+      <div class="content_bg">
+		  
+		  
+        <div class="mainbar">
+        <center><?php $this->blacklistForm->getElement('blog_select')->setValue($this->blogId);
+            echo $this->blacklistForm?></center>
+            
+            <p>Seleziona gli amici che vuoi inserire in blacklist:</p>
+            <p id="userListP">
+            <?php foreach ($this->Friends as $friend): 
+                $data = $this->FriendHelper ($friend);
+                ?>
+            <span><?= $data->name.' '.$data->surname?> </span>
+                
+            <input id="<?=$data->username?>" type="checkbox" 
+                   
+                   <?php if($this->Blocked($data->username,$this->blogId)) echo 'checked';?>
+                   
+                   />
+                
+            <?php endforeach;   ?>
+            
+            </p>
+            
+            <p id="resultUpdateBlacklist"></p>
+            
+            <button id="Black_button">aggiorna blacklist</button>
+        </div>
+        <a id="url" href="<?= $this->url(array('controller' => 'user', 'action' => 'blacklist',), 'default') ?>" hidden="hidden">url</a>
+        <div class="sidebar">
+		<?= $this->render('_sideLog.phtml') ?>
+     	<?= $this->render('_sideBar.phtml') ?>
+        </div>
+        <div class="clr"></div>
+      </div>
+    </div>
+	<div class="fbg">
+    
+  		<?= $this->render('_fbg.phtml') ?>
+  	</div>
+</div>

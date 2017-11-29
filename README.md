@@ -94,7 +94,7 @@ Operativamente, nella realizzazione del sito, si tenga conto delle seguenti spec
    
 • Gestione blog. Ogni membro può:
 
-      •creare un proprio blog (uno al massimo), specificandone il tema e postando il primo
+      •creare uno o più blog, specificandone il tema e postando il primo
       messaggio;
       
       • postare messaggi sul suo blog o su quelli degli amici;
